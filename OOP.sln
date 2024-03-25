@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "15_files_exception", "15_fi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "16_STL_Vector", "16_STL_Vector\16_STL_Vector.vcxproj", "{2F01CC66-9EFC-44E9-99BB-CE3BD620C6F6}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EXAM", "EXAM\EXAM.vcxproj", "{59223965-D9B1-418F-AB0D-6B0EE0A52C30}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,6 +53,14 @@ Global
 		{2F01CC66-9EFC-44E9-99BB-CE3BD620C6F6}.Release|x64.Build.0 = Release|x64
 		{2F01CC66-9EFC-44E9-99BB-CE3BD620C6F6}.Release|x86.ActiveCfg = Release|Win32
 		{2F01CC66-9EFC-44E9-99BB-CE3BD620C6F6}.Release|x86.Build.0 = Release|Win32
+		{59223965-D9B1-418F-AB0D-6B0EE0A52C30}.Debug|x64.ActiveCfg = Debug|x64
+		{59223965-D9B1-418F-AB0D-6B0EE0A52C30}.Debug|x64.Build.0 = Debug|x64
+		{59223965-D9B1-418F-AB0D-6B0EE0A52C30}.Debug|x86.ActiveCfg = Debug|Win32
+		{59223965-D9B1-418F-AB0D-6B0EE0A52C30}.Debug|x86.Build.0 = Debug|Win32
+		{59223965-D9B1-418F-AB0D-6B0EE0A52C30}.Release|x64.ActiveCfg = Release|x64
+		{59223965-D9B1-418F-AB0D-6B0EE0A52C30}.Release|x64.Build.0 = Release|x64
+		{59223965-D9B1-418F-AB0D-6B0EE0A52C30}.Release|x86.ActiveCfg = Release|Win32
+		{59223965-D9B1-418F-AB0D-6B0EE0A52C30}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
