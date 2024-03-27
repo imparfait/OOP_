@@ -1,6 +1,7 @@
 ﻿#include <iostream>
+#include <fstream>
 using namespace std;
-//ІДЕЯ ПРОДАЖУ ДАЙМОНДІВ КОЇНІВ І НАГЕТІВ ДЛЯ ОТРИМАННЯ ГРОШЕЙ ЗА ЯКІ ВСЕ КУПУЄТЬСЯ
+
 class Resources {
 protected:
 	int count;
@@ -59,6 +60,9 @@ class Wood :public Resources {
 public:
 	Wood(){cost = 1;}
 	void CuttingDown(int count, Hero& hero)const;
+	void SetWood(int count) {
+		this->count = count;
+	}
 	void Print()const {
 		cout << " -= Wood =-" << endl;
 		Resources::Print();
@@ -131,23 +135,18 @@ public:
 	}
 	void AddMoney(int money) {
 		this->money += money;
-		cout << " +" << money << " money" << endl;
 	}
 	void AddCoins(int count) {
 		coins.Add(count);
-		cout << " +" << count << " coins" << endl;
 	}
 	void AddNuggets(int count) {
 		nuggets.Add(count);
-		cout << " +" << count << " nuggets" << endl;
 	}
 	void AddDiamonds(int count) {
 		diamonds.Add(count);
-		cout << " +" << count << " diamonds" << endl;
 	}
 	void AddWood(int count) {
 		wood.Add(count);
-		cout << " +" << count << " wood" << endl;
 	}
 	void AddHealthPotion(int count) {
 		healthPotion.Add(count);
@@ -235,28 +234,36 @@ protected:
 	int HP;
 	int strength;
 	int lvl;
+	int Exp;
 public:
-	Units() :HP{ 20 }, lvl{ 0 } {}
+	Units() : lvl{ 0 } {
+		HP = 20;
+	}
+	//Units(int lvl) {HP = 20 + (2 * lvl);}
 	void LossHP(int hp) {
 		HP -= hp;
 		cout << "-" << hp << " HP" << endl;
 	}
+	int GetExp()const {
+		return Exp;}
 	int GetHP()const {
-		return HP;
+		return HP;}
+	int GetLvl()const {
+		return lvl;
 	}
+	void SetLvl(int lvl) { this->lvl = lvl; }
+	void SetHP(int hp) { HP = hp; }
 	int GetStrength()const {
 		return strength;
 	}
+	void SetStrength(int str) { strength = str; }
 	void Print()const {
 		cout << "Level: " << lvl << endl;
 		cout << "Strength: " << strength << endl;
-		cout << "HP: " << HP << endl;
-}
+		cout << "HP: " << HP << endl;}
 	virtual void LevelUp() {
 		HP += 2;
-		strength += 2;
-		lvl++;
-	}
+		strength += 2;}
 	virtual void Speak(bool isWin)const = 0;
 };
 class Enemy :public Units {
@@ -272,14 +279,29 @@ public:
 };
 class Hero :public Units {
 private:
-	int Exp;
 	int maxHP;
 	Inventory inventory;
 public:
-	Hero() :Exp{ 0 }, maxHP{ 20+(2*lvl)}, Units() {
+	Hero() : maxHP{ 20}, Units() {
+		Exp = 0;
 		strength = 3;
 	}
+	Hero(int lvl, int hp, int exp, int diamC, int coinsC,int nuggetsC, int money, int hpC, int spC, int woodC)  {
+		this->lvl = lvl;
+		maxHP = 20 + (2 * lvl);
+		strength = (3 + (2 * lvl));
+		HP = hp;
+		Exp = exp;
+		inventory.AddDiamonds(diamC);
+		inventory.AddCoins(coinsC);
+		inventory.AddNuggets(nuggetsC);
+		inventory.AddMoney(money);
+		inventory.AddHealthPotion(hpC);
+		inventory.AddStrengthPotion(spC);
+		inventory.AddWood(woodC);
+	}
 	void LevelUp() override{
+		Exp = Exp-25;
 		maxHP += 2;
 		strength += 2;
 		lvl++;
@@ -308,7 +330,6 @@ public:
 	void Attack(Enemy& enemy)const {
 		cout << "Enemy has ";
 		enemy.LossHP(strength);
-		
 	}
 	void AddHP(int hp) {
 		if (GetHP() + hp <= GetMaxHP()) {
@@ -359,13 +380,26 @@ private:
 	Diamonds diamonds;
 	Coins coins;
 	HealthPotion healthPotion;
-	int exp;
 	bool IsAlive;
 public:
-	Dragon(string name):exp{20}, name{ name }{
+	Dragon(string name): name{ name }{
+		Exp = 20;
 		IsAlive = true;
 		type = "DRAGON";
 		strength = 6;
+		diamonds.Add(1);
+		coins.Add(2);
+		if ((rand() % 2 + 1) == 2) {
+			healthPotion.Add(1);
+		}
+	}
+	Dragon(string name, int lvl, bool isAlive) : name{ name } {
+		Exp = 20;
+		this->lvl = lvl;
+		IsAlive = isAlive;
+		HP += (2 * lvl);
+		type = "DRAGON";
+		strength = 6 + (2 * lvl);
 		diamonds.Add(1);
 		coins.Add(2);
 		if ((rand() % 2 + 1) == 2) {
@@ -393,7 +427,7 @@ public:
 		if (IsAlive) {
 			HP += 2;
 			strength += 2;
-			lvl++;
+			//lvl++;
 		}
 	}
 	void Dead(Hero& hero) override{
@@ -402,7 +436,7 @@ public:
 		if (healthPotion.getCount() > 0) {
 			healthPotion.NewPotion(healthPotion.getCount(), hero);
 		}
-		hero.AddExp(exp);
+		hero.AddExp(this->Exp);
 		SetIsAlive(false);
 	}
 	void Print()const {
@@ -422,7 +456,15 @@ public:
 		type = "Monster";
 		coins.Add(1);
 		nuggets.Add(3);
-		strength = 4;
+		strength = 4 ;
+	}
+	Monster(int lvl) :exp{ 5 } {
+		this->lvl = lvl;
+		type = "Monster";
+		coins.Add(1);
+		nuggets.Add(3);
+		HP += (2 * lvl);
+		strength = 4 + (2 * lvl);
 	}
 	void Speak(bool isWin)const override {
 		if (isWin) {
@@ -436,7 +478,7 @@ public:
 		coins.Falling(coins.getCount(), hero);
 		nuggets.Falling(nuggets.getCount(), hero);
 		hero.AddExp(exp);
-		Monster();
+		Monster(this->lvl);
 	}
 	void Print()const {
 		cout << " -= Monster =-" << endl;
@@ -453,13 +495,20 @@ public:
 		nuggets.Add(2);
 		strength = 0;
 	}
+	Animals(int lvl) :exp{ 3 } {
+		this->lvl = lvl;
+		HP += (2 * lvl);
+		type = "Animal";
+		nuggets.Add(2);
+		strength = 0 + (2 * lvl);
+	}
 	void Speak(bool isWin)const override {
 		cout << "Oh..." << endl;
 	}
 	void Dead(Hero& hero) override {
 		nuggets.Falling(nuggets.getCount(), hero);
 		hero.AddExp(exp);
-		Animals();
+		Animals(this->lvl);
 	}
 	void Print()const {
 		cout << " -= Animal =-" << endl;
@@ -473,17 +522,22 @@ void Enemy::Attack(Hero& hero)const {
 }
 void Diamonds::Falling(int count, Hero& hero)const {
 	hero.GetInventory().AddDiamonds(count);
+	cout << " +" << count << " diamonds" << endl;
+
 }
 void Coins::Falling(int count, Hero& hero)const {
 	cout << "Click click click" << endl;
+	cout << " +" << count << " coins" << endl;
 	hero.GetInventory().AddCoins(count);
 }
 void Nuggets::Falling(int count, Hero& hero)const {
 	cout << "Click click" << endl;
+	cout << " +" << count << " nuggets" << endl;
 	hero.GetInventory().AddNuggets(count);
 }
 void Wood::CuttingDown(int count, Hero& hero)const {
 	cout << "Took Took Took" << endl;
+	cout << " +" << count << " wood" << endl;
 	hero.GetInventory().AddWood(count);
 }
 void HealthPotion::NewPotion(int count, Hero& hero)const {
@@ -507,15 +561,30 @@ public:
 		strengthPotion.Add(3);
 		healthRecoveryCount = 2;
 	}
+	Shop(int hpC,int spC, int hrC) {
+		healthPotion.Add(hpC);
+		strengthPotion.Add(spC);
+		healthRecoveryCount = hrC;
+	}
 	void Print()const {
 		cout << " -==== SHOP ====-" << endl;
 		cout << "Health potion: " << healthPotion.getCount() << "\t\t\tCost: " << healthPotion.getCost()<<endl;
 		cout << "Strength potion: " << strengthPotion.getCount() << "\t\t\tCost: " << strengthPotion.getCost() << endl;
 		cout << "Remainder of full health recovery: " << healthRecoveryCount<<"\tCost: 1" << endl;
 	}
-	void SellHealthPotion(Hero& hero)const {
+	int GetCountHealthPotion() {
+		return healthPotion.getCount();
+	}
+	int GetCountStrengthPotion() {
+		return strengthPotion.getCount();
+	}
+	int GetHealthRecoveryCount() {
+		return healthRecoveryCount;
+	}
+	void SellHealthPotion(Hero& hero) {
 		if (healthPotion.getCount() > 0 && hero.GetInventory().getMoney() - healthPotion.getCost() >= 0) {
 			healthPotion.NewPotion(1, hero);
+			healthPotion.Sub(1);
 			hero.GetInventory().RemoveMoney(healthPotion.getCost());
 		}
 		else {
@@ -525,9 +594,10 @@ public:
 			else { cout << "Not enough money" << endl; }
 		}
 	}
-	void SellStrengthPotion(Hero& hero)const {
+	void SellStrengthPotion(Hero& hero) {
 		if (strengthPotion.getCount() > 0 && hero.GetInventory().getMoney()- strengthPotion.getCost() >=0){
 			strengthPotion.NewPotion(1, hero);
+			strengthPotion.Sub(1);
 			hero.GetInventory().RemoveMoney(strengthPotion.getCost());
 		}
 		else {
@@ -539,6 +609,7 @@ public:
 	}
 	void BuyWood( Hero& hero)const {
 		if (hero.GetInventory().getWoodCount() > 0) {
+			cout << " +" << (hero.GetInventory().getWoodCount() * hero.GetInventory().getWoodCost()) << " money" << endl;
 			hero.GetInventory().AddMoney(hero.GetInventory().getWoodCount()* hero.GetInventory().getWoodCost());
 			hero.GetInventory().RemoveWood(hero.GetInventory().getWoodCount());
 		}
@@ -548,6 +619,7 @@ public:
 	}
 	void BuyDiamonds(Hero& hero)const {
 		if (hero.GetInventory().getDaimondsCount() > 0) {
+			cout << " +" << (hero.GetInventory().getDaimondsCost() * hero.GetInventory().getDaimondsCount()) << " money" << endl;
 			hero.GetInventory().AddMoney(hero.GetInventory().getDaimondsCost() * hero.GetInventory().getDaimondsCount());
 			hero.GetInventory().RemoveDiamonds(hero.GetInventory().getDaimondsCount());
 		}
@@ -557,6 +629,7 @@ public:
 	}
 	void BuyCoins(Hero& hero)const {
 		if (hero.GetInventory().getCoinsCount() > 0) {
+			cout << " +" << (hero.GetInventory().getCoinsCost() * hero.GetInventory().getCoinsCount()) << " money" << endl;
 			hero.GetInventory().AddMoney(hero.GetInventory().getCoinsCost() * hero.GetInventory().getCoinsCount());
 			hero.GetInventory().RemoveCoins(hero.GetInventory().getCoinsCount());
 		}
@@ -566,6 +639,7 @@ public:
 	}
 	void BuyNuggets(Hero& hero)const {
 		if (hero.GetInventory().getNuggetsCount() > 0) {
+			cout << " +" << (hero.GetInventory().getNuggetsCost() * hero.GetInventory().getNuggetsCount())<< " money" << endl;
 			hero.GetInventory().AddMoney(hero.GetInventory().getNuggetsCost() * hero.GetInventory().getNuggetsCount());
 			hero.GetInventory().RemoveNuggets(hero.GetInventory().getNuggetsCount());
 		}
@@ -659,7 +733,7 @@ void Store(Shop& shop, Hero& hero) {
 void Fight(Enemy& enemy, Hero& hero) {
 	bool IsHeroAlive=true;
 	char choise;
-	cout << "The fight started!!!" << endl;
+	cout << "\n\tThe fight started!!!\n" << endl;
 	cout << endl;
 	while (IsHeroAlive ) {
 		hero.Attack(enemy);
@@ -672,37 +746,42 @@ void Fight(Enemy& enemy, Hero& hero) {
 			break;
 		}
 		enemy.Print();
-		do{
-			cout << "Enemy attacking. Where will you dodge to the right(Enter [R]) or to the left(Enter [L])?" << endl;
-			cout << "Enter your choise: ";
-			cin >> choise;
-			if (choise != 'R' && choise != 'L') {
-				cout << "Enter right value!"<<endl;
+		if(enemy.GetStrength()!=0){
+			do {
+				cout << "Enemy attacking. Where will you dodge to the right(Enter [R]) or to the left(Enter [L])?" << endl;
+				cout << "Enter your choise: ";
+				cin >> choise;
+				if (choise != 'R' && choise != 'L') {
+					cout << "Enter right value!" << endl;
+				}
+				else { break; }
+			} while (choise != 0);
+			int random = (rand() % 2 + 1);//1 - right		2 - left
+			cout << endl;
+			if (random == 1 && choise == 'R') {
+				enemy.Attack(hero);
+				if (hero.GetHP() <= 0) {
+					IsHeroAlive = false;
+					hero.Speak(IsHeroAlive);
+					enemy.Speak(!IsHeroAlive);
+					hero.Dead();
+				}
 			}
-			else {break;}
-		} while (choise != 0);
-		int random= (rand() % 2 + 1);//1 - right		2 - left
-		if (random == 1 && choise == 'R') {
-			enemy.Attack(hero);
-			if (hero.GetHP() <= 0) {				
-				IsHeroAlive = false;
-				hero.Speak(IsHeroAlive);
-				enemy.Speak(!IsHeroAlive);
-				hero.Dead();
-			}}
-		else if (random == 1 && choise == 'L') {
-			cout << "You dodged successfully" << endl;
-		}
-		else if (random == 2 && choise == 'L') {
-			enemy.Attack(hero);
-			if (hero.GetHP() <= 0) {
-				IsHeroAlive = false;
-				hero.Speak(IsHeroAlive);
-				enemy.Speak(!IsHeroAlive);
-				hero.Dead();
-			}}
-		else if (random == 2 && choise == 'R') {
-			cout << "You dodged successfully" << endl;
+			else if (random == 1 && choise == 'L') {
+				cout << "You dodged successfully" << endl;
+			}
+			else if (random == 2 && choise == 'L') {
+				enemy.Attack(hero);
+				if (hero.GetHP() <= 0) {
+					IsHeroAlive = false;
+					hero.Speak(IsHeroAlive);
+					enemy.Speak(!IsHeroAlive);
+					hero.Dead();
+				}
+			}
+			else if (random == 2 && choise == 'R') {
+				cout << "You dodged successfully" << endl;
+			}
 		}
 		cout << endl;
 		hero.Print();
@@ -742,11 +821,113 @@ void Map( Dragon& dragon1, Dragon& dragon2, Dragon& dragon3) {
 	}
 }
 
-void UserMenu() {
-	cout << "Enter 1 to exit game and save" << endl;
-	cout << "Enter 2 to see map" << endl;
-	cout << "Enter 3 to see inventory" << endl;
-	cout << "Enter 0 to exit menu" << endl;
+void SaveGame(Hero& hero, Dragon& dragon1, Dragon& dragon2, Dragon& dragon3, Shop& shop, int position, Wood& wood ) {
+	ofstream file("savegame.bin", ofstream::out | ofstream::trunc);
+	if (file.is_open()) {
+		file << hero.GetExp() << endl;
+		file << hero.GetHP() << endl;
+		file << hero.GetLvl() << endl;
+		file << hero.GetInventory().getCoinsCount() << endl;
+		file << hero.GetInventory().getDaimondsCount() << endl;
+		file << hero.GetInventory().getNuggetsCount() << endl;
+		file << hero.GetInventory().getMoney()<< endl;
+		file << hero.GetInventory().GetHealthPotionCount() << endl;
+		file << hero.GetInventory().GetStrengthPotionCount() << endl;
+		file << hero.GetInventory().getWoodCount()<< endl;
+		file << dragon1.GetName() << endl;
+		file << dragon1.GetIsAlive() << endl;
+		file << dragon2.GetName() << endl;
+		file << dragon2.GetIsAlive() << endl;
+		file << dragon3.GetName() << endl;
+		file << dragon3.GetIsAlive() << endl;
+		file << shop.GetCountHealthPotion() << endl;
+		file << shop.GetCountStrengthPotion() << endl;
+		file << shop.GetHealthRecoveryCount() << endl;
+		file << position << endl;
+		file << wood.getCount() << endl;
+		file.close();
+		cout << "Game saved." << endl;
+	}
+	else {
+		cout << "Could not open file for writing." << endl;
+	}
+}
+
+void LoadGame(Hero& hero, Dragon& dragon1, Dragon& dragon2, Dragon& dragon3, Shop& shop, static int& position, Monster& monster, Animals& animal, Wood& wood) {
+	ifstream file("savegame.bin");
+	if (!file.is_open()) {
+		cout << "The game is not saved. Start of a new game..."<<endl;
+		return ;
+	}
+	file.seekg(0, ios::end);
+	if (file.tellg() == 0) {
+		cout << "No saved game. Start of a new game..."<<endl;
+		file.close();
+		return;
+	}
+	file.seekg(0, ios::beg);
+	int exp, heroHP, lvl,coinsC,nuggetsC,diamC,money,hpC,spC,woodC,hrC,pos;
+	file >> exp;
+	file >> heroHP;
+	file >> lvl;
+	file >> coinsC;
+	file >> diamC;
+	file >> nuggetsC;
+	file >> money;
+	file >> hpC;
+	file >> spC;
+	file >> woodC;
+	Hero herotmp{ lvl,  heroHP, exp, diamC, coinsC, nuggetsC,  money,  hpC,  spC,  woodC };
+	hero = herotmp;
+	string d1Name, d2Name,d3Name;
+	bool d1IsAlive, d2IsAlive, d3IsAlive;
+	file >> d1Name;
+	file >> d1IsAlive;
+	file >> d2Name;
+	file >> d2IsAlive;
+	file >> d3Name;
+	file >> d3IsAlive;
+	Dragon dragon1tmp{ d1Name,lvl,d1IsAlive }, dragon2tmp{ d2Name,lvl,d2IsAlive }, dragon3tmp{ d3Name,lvl,d3IsAlive };
+	dragon1 = dragon1tmp;
+	dragon2 = dragon2tmp;
+	dragon3 = dragon3tmp;
+	file >> hpC;
+	file >> spC;
+	file >> hrC;
+	Shop sh{ hpC ,spC ,hrC };
+	shop = sh;
+	file >> pos;
+	file >> woodC;
+	position = pos;
+	wood.SetWood(woodC);
+	Monster m{ lvl };
+	Animals a{ lvl };
+	monster = m;
+	animal = a;
+	file.close();
+}
+
+void MainMenu(Hero& hero, Dragon& dragon1, Dragon& dragon2, Dragon& dragon3, Shop& shop, static int& position, Monster& monster, Animals& animal, Wood& wood);
+
+void GameMenu(Hero& hero, Dragon& dragon1, Dragon& dragon2, Dragon& dragon3, Shop& shop, static int& position, Monster& monster, Animals& animal, Wood& wood) {
+	int menu;
+	do {
+		cout << "Enter 1 to save game" << endl;
+		cout << "Enter 2 to exit game" << endl;
+		cout << "Enter 0 to exit menu" << endl;
+		cout << "Enter your choise: ";
+		cin >> menu;
+		if (menu == 1) {
+			SaveGame(hero, dragon1, dragon2, dragon3, shop, position,wood);
+		}
+		else if (menu == 2) {
+			MainMenu(hero, dragon1, dragon2, dragon3, shop, position, monster, animal,wood);
+		}
+		else if (menu != 0) {
+			cout << "Enter right value!" << endl;
+			continue;
+		}
+	} while (menu!=0);
 }
 
 void Game(Dragon& dragon1, Dragon& dragon2, Dragon& dragon3, Monster& monster, Animals& animal, Hero& hero, Wood& wood,Shop& shop) {
@@ -801,7 +982,7 @@ void Game(Dragon& dragon1, Dragon& dragon2, Dragon& dragon3, Monster& monster, A
 			Store(shop,hero);
 		}
 		else {
-			random = rand() % 3 + 1;//1-wood 2-animals 3-monters
+			random = rand() % 3 + 1;//1-wood 2-animals 3-monsters
 			if (random == 1 && wood.getCount() == 0) { random++; }
 			cout << endl;
 			switch (random) {
@@ -815,24 +996,26 @@ void Game(Dragon& dragon1, Dragon& dragon2, Dragon& dragon3, Monster& monster, A
 				}
 				break;
 			case 2:
-				cout << "You meet Animal! Get ready!" << endl;
+				cout << "\tYou meet Animal! Get ready!" << endl;
 				cout << endl;
 				hero.Print();
 				cout << endl;
-				cout << " Enter [+] to use {Health potion}, [-] to use {Strength potion} or [0] to skip: ";
-				cin >> move;
-				if (move == '+') {
-					hero.GetNewHP();
+				if (hero.GetInventory().GetHealthPotionCount() != 0 || hero.GetInventory().GetStrengthPotionCount() != 0) {
+					cout << " Enter [+] to use {Health potion}, [-] to use {Strength potion} or [0] to skip: ";
+					cin >> move;
+					if (move == '+') {
+						hero.GetNewHP();
+					}
+					else if (move == '-') {
+						hero.GetNewStrength();
+					}
+					cout << endl;
 				}
-				else if (move == '-') {
-					hero.GetNewStrength();
-				}
-				cout << endl;
 				animal.Print();
 				Fight(animal, hero);
 				break;
 			case 3:
-				cout << "You meet Monster! Get ready!" << endl;
+				cout << "\tYou meet Monster! Get ready!" << endl;
 				cout << endl;
 				hero.Print();
 				cout << endl;
@@ -852,6 +1035,14 @@ void Game(Dragon& dragon1, Dragon& dragon2, Dragon& dragon3, Monster& monster, A
 				break;
 			}
 		}
+		if (hero.GetExp() >= 25) {
+			dragon1.LevelUp();
+			dragon2.LevelUp();
+			dragon3.LevelUp();
+			monster.LevelUp();
+			animal.LevelUp();
+			hero.LevelUp();
+		}
 		do {cout << endl;
 			cout << "Enter [G] to visit game menu" << endl;
 			cout << "Enter [M] to see map" << endl;
@@ -860,7 +1051,7 @@ void Game(Dragon& dragon1, Dragon& dragon2, Dragon& dragon3, Monster& monster, A
 			cin >> move;
 			cout << endl;
 			if (move=='G'){
-				UserMenu();
+				GameMenu(hero, dragon1, dragon2, dragon3, shop, position,monster,animal,wood);
 			}
 			else if (move=='M') {
 				Map(dragon1, dragon2, dragon3);
@@ -876,9 +1067,34 @@ void Game(Dragon& dragon1, Dragon& dragon2, Dragon& dragon3, Monster& monster, A
 	} while (position != 0&&position<=200);
 }
 
+void MainMenu(Hero& hero, Dragon& dragon1, Dragon& dragon2, Dragon& dragon3, Shop& shop, static int& position, Monster& monster, Animals& animal, Wood& wood) {
+	int menu;
+	do{
+		cout << "Enter 1 to start new game" << endl;
+		cout << "Enter 2 to load game" << endl;
+		cout << "Enter 0 to exit" << endl;
+		cout << "Enter your choise: ";
+		cin >> menu;
+		if (menu == 1) {
+			cout << "\n\tGame started\n" << endl;
+			Game(dragon1, dragon2, dragon3, monster, animal, hero, wood, shop);
+		}
+		else if (menu == 2) {
+			cout << "\n\tLoading the game\n" << endl;
+			LoadGame(hero, dragon1, dragon2, dragon3, shop, position, monster, animal,wood);
+			cout << "\n\tGame started\n" << endl;
+			Game(dragon1, dragon2, dragon3, monster, animal, hero, wood, shop);
+		}
+		else {
+			cout << "Enter right value!" << endl;
+		}
+	} while (menu==0);
+
+}
+
 int main(){
 	srand(time(0));
-	position = 1;////////////// = 0;
+	position  = 1;
 	Shop s;
 	Dragon dragon1{ "d1" };
 	Dragon dragon2{ "d2" };
@@ -888,5 +1104,6 @@ int main(){
 	Hero h;
 	Wood wood;
 	wood.Add(50);
-	Game(dragon1,dragon2,dragon3,m,a,h,wood,s);
+	m.Dead(h);
+	//MainMenu(h, dragon1, dragon2, dragon3, s, position, m, a, wood);
 }
