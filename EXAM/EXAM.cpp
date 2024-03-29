@@ -283,10 +283,11 @@ public:
 		inventory.AddStrengthPotion(spC);
 		inventory.AddWood(woodC);}
 	void LevelUp() override{
+		cout << "\n\tLEVEL UP" << endl;
 		Exp = Exp- ExpToNextLvl;
 		ExpToNextLvl += 5;
 		maxHP += 2;
-		HP += 5;
+		HP += 4;
 		strength += 2;
 		++lvl;}
 	Inventory& GetInventory() {return inventory;}
